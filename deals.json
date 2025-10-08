@@ -1,0 +1,15 @@
+[
+  {
+    "id": 1,
+    "title": "Producto example",
+    "category": "tecnologia",
+    "price": 99.99,
+    "oldPrice": 149.99,
+    "discount": 33,
+    "score": 85,
+    "analysis": "Análisis de la IA aquí",
+    "link": "https://...",
+    "time": "Hace 10 min",
+    "comments": 45
+  }
+]
