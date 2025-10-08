@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deal Hunter - Los Mejores Chollos Analizados por IA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .deals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .deal-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .deal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .deal-score {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3em;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .score-high { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .score-medium { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .score-low { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+
+        .deal-category {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .deal-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #2d3748;
+            line-height: 1.4;
+        }
+
+        .deal-price {
+            font-size: 2em;
+            font-weight: 800;
+            color: #667eea;
+            margin: 15px 0;
+        }
+
+        .deal-old-price {
+            text-decoration: line-through;
+            color: #a0aec0;
+            font-size: 0.5em;
+            margin-left: 10px;
+        }
+
+        .deal-discount {
+            display: inline-block;
+            background: #f56565;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 700;
+            margin-left: 10px;
+        }
+
+        .deal-analysis {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-size: 0.95em;
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .deal-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e2e8f0;
+            font-size: 0.9em;
+            color: #718096;
+        }
+
+        .deal-time {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .deal-link {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-top: 15px;
+        }
+
+        .deal-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.5em;
+            padding: 60px;
+        }
+
+        .no-deals {
+            text-align: center;
+            color: white;
+            font-size: 1.3em;
+            padding: 60px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .deals-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .deal-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔥 Deal Hunter</h1>
+            <p class="subtitle">Los mejores chollos analizados por IA en tiempo real</p>
+        </header>
+
+        <div class="filters">
+            <button class="filter-btn active" data-category="all">Todos</button>
+            <button class="filter-btn" data-category="tecnologia">Tecnología</button>
+            <button class="filter-btn" data-category="gaming">Gaming</button>
+            <button class="filter-btn" data-category="hogar">Hogar</button>
+            <button class="filter-btn" data-category="moda">Moda</button>
+        </div>
+
+        <div class="deals-grid" id="dealsGrid">
+            <div class="loading">Cargando los mejores chollos...</div>
+        </div>
+    </div>
+
+    <script>
+        // Datos de ejemplo - En producción esto vendrá de deals.json generado por N8N
+        const dealsData = [
+            {
+                id: 1,
+                title: "SSD Samsung 980 PRO 1TB NVMe PCIe 4.0",
+                category: "tecnologia",
+                price: 89.99,
+                oldPrice: 159.99,
+                discount: 44,
+                score: 95,
+                analysis: "Precio histórico mínimo. Este SSD es de los más rápidos del mercado con velocidades de lectura de hasta 7000 MB/s. Ideal para gaming y creación de contenido.",
+                link: "#",
+                time: "Hace 15 min",
+                comments: 47
+            },
+            {
+                id: 2,
+                title: "Auriculares Sony WH-1000XM5 con cancelación de ruido",
+                category: "tecnologia",
+                price: 279.99,
+                oldPrice: 399.99,
+                discount: 30,
+                score: 88,
+                analysis: "Excelente oferta para los mejores auriculares con cancelación de ruido del mercado. Los comentarios confirman que es el precio más bajo en 6 meses.",
+                link: "#",
+                time: "Hace 32 min",
+                comments: 89
+            },
+            {
+                id: 3,
+                title: "Nintendo Switch OLED + Mario Kart 8",
+                category: "gaming",
+                price: 299.99,
+                oldPrice: 389.99,
+                discount: 23,
+                score: 92,
+                analysis: "Bundle increíble. La Switch OLED sola ya es un chollo a este precio, y viene con uno de los mejores juegos de la consola. Stock limitado.",
+                link: "#",
+                time: "Hace 1 hora",
+                comments: 156
+            },
+            {
+                id: 4,
+                title: "Robot Aspirador Xiaomi S10+ con estación de vaciado",
+                category: "hogar",
+                price: 349.99,
+                oldPrice: 549.99,
+                discount: 36,
+                score: 85,
+                analysis: "Muy buena relación calidad-precio. Incluye mapeo láser, potencia de succión de 4000Pa y estación de autovaciado. Usuarios reportan excelente rendimiento.",
+                link: "#",
+                time: "Hace 2 horas",
+                comments: 34
+            },
+            {
+                id: 5,
+                title: "Zapatillas Nike Air Max 90 - Varios colores",
+                category: "moda",
+                price: 79.99,
+                oldPrice: 139.99,
+                discount: 43,
+                analysis: "Clásico atemporal a precio de derribo. Disponible en 8 colores diferentes. Tallas limitadas, especialmente las más populares se están agotando rápido.",
+                link: "#",
+                time: "Hace 3 horas",
+                comments: 23
+            },
+            {
+                id: 6,
+                title: "Monitor Gaming LG 27'' 165Hz QHD IPS",
+                category: "gaming",
+                price: 249.99,
+                oldPrice: 399.99,
+                discount: 38,
+                score: 90,
+                analysis: "Especificaciones premium a precio mid-range. Panel IPS con excelentes ángulos de visión, 165Hz para gaming fluido y resolución QHD nítida. Muy recomendado por la comunidad.",
+                link: "#",
+                time: "Hace 4 horas",
+                comments: 67
+            }
+        ];
+
+        let currentFilter = 'all';
+
+        function getScoreClass(score) {
+            if (score >= 90) return 'score-high';
+            if (score >= 75) return 'score-medium';
+            return 'score-low';
+        }
+
+        function renderDeals() {
+            const grid = document.getElementById('dealsGrid');
+            const filteredDeals = currentFilter === 'all' 
+                ? dealsData 
+                : dealsData.filter(deal => deal.category === currentFilter);
+
+            if (filteredDeals.length === 0) {
+                grid.innerHTML = '<div class="no-deals">No hay chollos en esta categoría... ¡pero seguimos buscando! 🔍</div>';
+                return;
+            }
+
+            grid.innerHTML = filteredDeals.map(deal => `
+                <div class="deal-card">
+                    <div class="deal-score ${getScoreClass(deal.score)}">
+                        ${deal.score}
+                    </div>
+                    <span class="deal-category">${deal.category.toUpperCase()}</span>
+                    <h2 class="deal-title">${deal.title}</h2>
+                    <div class="deal-price">
+                        ${deal.price}€
+                        <span class="deal-old-price">${deal.oldPrice}€</span>
+                        <span class="deal-discount">-${deal.discount}%</span>
+                    </div>
+                    <div class="deal-analysis">
+                        <strong>💡 Análisis IA:</strong> ${deal.analysis}
+                    </div>
+                    <div class="deal-meta">
+                        <span class="deal-time">🕐 ${deal.time}</span>
+                        <span>💬 ${deal.comments} comentarios</span>
+                    </div>
+                    <a href="${deal.link}" class="deal-link" target="_blank">Ver Oferta →</a>
+                </div>
+            `).join('');
+        }
+
+        // Filtros
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.category;
+                renderDeals();
+            });
+        });
+
+        // Cargar deals al inicio
+        renderDeals();
+
+        // En producción, descomenta esto para cargar desde deals.json:
+        /*
+        async function loadDeals() {
+            try {
+                const response = await fetch('deals.json');
+                const data = await response.json();
+                dealsData = data;
+                renderDeals();
+            } catch (error) {
+                document.getElementById('dealsGrid').innerHTML = 
+                    '<div class="no-deals">Error al cargar los chollos. Recarga la página.</div>';
+            }
+        }
+        loadDeals();
+        
+        // Auto-refresh cada 5 minutos
+        setInterval(loadDeals, 300000);
+        */
+    </script>
+</body>
+</html>
